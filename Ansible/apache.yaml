@@ -1,32 +1,33 @@
-- name: This sets up an httpd webserver
+- name: Install and Configure Apache Web Server
   hosts: aws_ec2
   become: yes
   remote_user: ec2-user
-  gather_facts: true
-  vars:
-    ansible_ssh_private_key_file: "/etc/ansible/euran-jenkins.pem"  
-    ansible_ssh_user: "ec2-user"
+
   tasks:
-  - name: "Install httpd and php packages"
-    package:
-        name:
-          - "httpd"
-          - "php"
+
+    - name: Install Apache
+      yum:
+        name: httpd
         state: present
-  - name: "copy code from GitHub"
-    get_url:
-        url: https://www.shubhammishra.in
-        dest: "/var/www/html/index.php"
-  - name: "Start httpd services"
-    service:
+
+    - name: Install PHP (optional)
+      yum:
+        name: php
+        state: present
+
+    - name: Copy index file
+      copy:
+        src: index.php
+        dest: /var/www/html/index.php
+        mode: '0644'
+
+    - name: Enable Apache service
+      service:
+        name: httpd
+        enabled: yes
+
+    - name: Start Apache service
+      service:
         name: httpd
         state: started
-  - name: Yum Install Packages
-    yum: name={{item}} state=latest
-    with_items:
-       - wget
-  - name: terraform install
-    unarchive:
-      src: https://releases.hashicorp.com/terraform/0.9.1/terraform_0.9.1_linux_amd64.zip
-      dest: /usr/bin
-      remote_src: True
+
