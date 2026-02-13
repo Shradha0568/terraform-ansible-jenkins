@@ -1,7 +1,8 @@
 terraform {
   backend "s3" {
-    bucket = "euran-terraform-statefile"
-    key = "server_name/statefile"
+    bucket = "terraform-ansible-task-statefile"
+    key    = "server_name/statefile"
     region = "us-west-2"
   }
-}  
+}
+
