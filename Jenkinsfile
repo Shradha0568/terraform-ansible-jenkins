@@ -33,6 +33,9 @@ pipeline {
                     echo "[web]" > inventory
 		    echo "$INSTANCE_IP" >> inventory
 
+		    mkdir -p ~/.ssh
+		    chmod 700 ~/.ssh
+		    
 		    ssh-keyscan -H $INSTANCE_IP >> ~/.ssh/known_hosts
 
 		    cd ../Ansible
