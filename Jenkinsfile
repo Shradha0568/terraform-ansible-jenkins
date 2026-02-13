@@ -31,14 +31,17 @@ pipeline {
                     INSTANCE_IP=$(terraform output -raw instance_ip)
 
                     echo "[web]" > inventory
-                    echo "$INSTANCE_IP" >> inventory
+		    echo "$INSTANCE_IP" >> inventory
 
-                    cd ../Ansible
+		    ssh-keyscan -H $INSTANCE_IP >> ~/.ssh/known_hosts
 
+		    cd ../Ansible
+		    
                     ansible-playbook -i ../Terraform/inventory apache.yaml \
-                      --private-key ~/euran-jenkins.pem \
-                      -u ec2-user
-                    '''
+		    --private-key /var/lib/jenkins/euran-jenkins.pem \
+		    -u ec2-user
+		   
+		    '''
                 }
             }
         }
