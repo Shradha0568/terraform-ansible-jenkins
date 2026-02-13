@@ -25,3 +25,8 @@ resource "aws_instance" "dev_machine" {
     Name = "${var.name}-server"
   }
 }
+
+output "instance_ip" {
+  value = aws_instance.dev_machine.public_ip
+}
+

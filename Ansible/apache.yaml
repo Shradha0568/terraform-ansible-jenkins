@@ -1,5 +1,5 @@
 - name: Install and Configure Apache Web Server
-  hosts: aws_ec2
+  hosts: web
   become: yes
   remote_user: ec2-user
 
