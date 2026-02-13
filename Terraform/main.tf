@@ -14,15 +14,43 @@ data "aws_ami" "amazon-linux" {
   }
 }
 
+resource "aws_security_group" "web_sg" {
+  name = "${var.name}-sg"
+
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 resource "aws_instance" "dev_machine" {
-  ami = data.aws_ami.amazon-linux.id
+  ami           = data.aws_ami.amazon-linux.id
   instance_type = "t3.micro"
-  key_name = "euran-jenkins"
+  key_name      = "euran-jenkins"
+
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
 
   tags = {
     Environment = "dev"
-    Name = "${var.name}-server"
+    Name        = "${var.name}-server"
   }
 }
 
