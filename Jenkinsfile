@@ -7,7 +7,7 @@ pipeline {
     }
 
     stages {
-        stage('Run Terraform + Ansible') {
+        stage('Terraform + Ansible Deploy') {
             steps {
                 withCredentials([
                     string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
@@ -22,18 +22,26 @@ pipeline {
                     export TF_VAR_name=${SERVER_NAME}
 
                     terraform init
-                    terraform plan
-                    terraform $TERRAFORM_ACTION -auto-approve
+                    terraform apply -auto-approve
 
                     if [ "$TERRAFORM_ACTION" = "destroy" ]; then
                         exit 0
-                    else
-                        cd ../Ansible
-                        ansible-playbook -i /opt/ansible/inventory/aws_ec2.yaml apache.yaml
                     fi
+
+                    INSTANCE_IP=$(terraform output -raw instance_ip)
+
+                    echo "[web]" > inventory
+                    echo "$INSTANCE_IP" >> inventory
+
+                    cd ../Ansible
+
+                    ansible-playbook -i ../Terraform/inventory apache.yaml \
+                      --private-key ~/euran-jenkins.pem \
+                      -u ec2-user
                     '''
                 }
             }
         }
     }
 }
+
