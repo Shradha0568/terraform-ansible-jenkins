@@ -11,7 +11,8 @@ pipeline {
             steps {
                 withCredentials([
                     string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY'),
+                    sshUserPrivateKey(credentialsId: 'ec2-key', keyFileVariable: 'SSH_KEY')
                 ]) {
                     sh '''
                     set -xe
@@ -31,20 +32,19 @@ pipeline {
                     INSTANCE_IP=$(terraform output -raw instance_ip)
 
                     echo "[web]" > inventory
-		    echo "$INSTANCE_IP" >> inventory
+                    echo "$INSTANCE_IP" >> inventory
 
-		    mkdir -p ~/.ssh
-		    chmod 700 ~/.ssh
-		    
-		    ssh-keyscan -H $INSTANCE_IP >> ~/.ssh/known_hosts
+                    mkdir -p ~/.ssh
+                    chmod 700 ~/.ssh
 
-		    cd ../Ansible
-		    
+                    ssh-keyscan -H $INSTANCE_IP >> ~/.ssh/known_hosts
+
+                    cd ../Ansible
+
                     ansible-playbook -i ../Terraform/inventory apache.yaml \
-		    --private-key /var/lib/jenkins/euran-jenkins.pem \
-		    -u ec2-user
-		   
-		    '''
+                    --private-key $SSH_KEY \
+                    -u ec2-user
+                    '''
                 }
             }
         }
